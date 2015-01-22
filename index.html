@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <title>Midpoint</title>
+        <script src='./jquery-2.0.3.min.js'></script>
+        <script src='./seedrandom.js'></script>
+        <script src='./midpoint2.js'></script>
+         <style>
+            body{
+                width: 500%;    
+            }
+            #map,
+            #map2,
+            #sector{
+                display: inline-block;
+                font-size: .5em;    
+            }
+
+            .row{
+                display: block;
+                clear: both;
+            }
+
+            .tile{
+                width: 3px;
+                height: 3px;
+                float: left;
+            }
+
+            #profile{
+                display: inline-block;
+                /*
+                width: 780px;
+                height: 650px;
+                */
+                background: black;   
+            }
+
+            .profilewrap{
+                /*width: 100%;*/
+            }
+
+            #meter, #seed{
+                font-family: arial;
+                font-size: 1.5em;    
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id='seed'></div>
+
+        <div id='map'></div><div id='map2'></div>
+        <div id='sector'></div>
+        <div id='profile'></div>
+        <div id='meter'></div>
+        <canvas id='canvas' style='background: black;' width='15000' height='15000'></canvas>
+    </body>
+</html>
