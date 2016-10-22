@@ -1,259 +1,340 @@
-function componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? '0' + hex : hex;
-}
+function ColorLuminance(hex, lum) {
 
-function rgbToHex(r, g, b) {
-    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
-}
+	// validate hex string
+	hex = String(hex).replace(/[^0-9a-f]/gi, '');
+	if (hex.length < 6) {
+		hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+	}
+	lum = lum || 0;
 
-function float2color( percentage ) {
-    var color_part_dec = 255 * percentage;
-    var color_part_hex = Number(parseInt( color_part_dec , 10)).toString(16);
-    return "#" + color_part_hex + color_part_hex + color_part_hex;
+	// convert to decimal and change luminosity
+	var rgb = "#", c, i;
+	for (i = 0; i < 3; i++) {
+		c = parseInt(hex.substr(i*2,2), 16);
+		c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+		rgb += ("00"+c).substr(c.length);
+	}
+
+	return rgb;
 }
 
 function normalizeHeight(height){
-    return (height).toFixed(6);
+	return (height);
 }
 
 function getTerrainColor(height){
-    var water = 0;
+	var water = 0;
 
-    return float2color(height);
+	switch(true){
+		case(height > water + 1):
+			var color = '#FFFAFA';
+			break;
+		case(height > water + .9):
+			var color = '#F5F5F5';
+			break;
+		case(height > water + .8):
+			var color = '#DCDCDC';
+			break;
+		case(height > water + .7):
+			var color = '#D3D3D3';
+			break;
+		case(height > water + .6):
+			var color = '#778899';
+			break;
+		case(height > water + .5):
+			var color = '#2F4F4F';
+			break;
+		case(height > water + .4):
+			var color = '#228B22';
+			break;
+		case(height > water + .3):
+			var color = '#556B2F';
+			break;
+		case(height > water +.25):
+			var color = '#A0522D';
+			break;
+		case(height > water +.2):
+			var color = '#CD853F';
+			break;
+		case(height > water +.15):
+			var color = '#6B8E23';
+			break;
+		case(height > water +.1):
+			var color = '#D2B48C';
+			break;
+		case(height > water +.05):
+			var color = '#907B71';
+			break;
+		case(height > water - .05):
+			var color = '#DFBE6F';
+			break;
+		case(height > water - .1):
+			var color = '#1E90FF';
+			break;
+		case(height > water - .2):
+			var color = '#4169E1';
+			break;
+		case(height > water - .3):
+			var color = '#0000FF';
+			break;
+		case(height > water - .4):
+			var color = '#0000CD';//float2color(height);
+			break;
+		case(height > water - .5):
+			var color = '#191970';//float2color(height);
+			break;
+		case(height > water - .6):
+			var color = '#000080';//float2color(height);
+			break;
+		case(height > water - .7):
+			var color = '#000080';//float2color(height);
+			break;
+		case(height > water - .8):
+			var color = '#000080';//float2color(height);
+			break;
+		case(height > water - .9):
+			var color = '#01015A';//float2color(height);
+			break;
+		case(height > water - 10):
+			var color = '#00001F';//float2color(height);
+			break;
+		default:
+			var color = '#FF0000';//float2color(height);
+			break;
+	}
 
-    switch(true){
-        case(height > water + .7):
-         var color = 'snow';
-            break;
-        case(height > water + .6):
-            var color = 'lightSlateGray';
-            break;
-        case(height > water + .5):
-            var color = 'darkSlateGray';
-            break;
-        case(height > water + .4):
-            var color = 'forestgreen';
-            break;
-        case(height > water + .3):
-            var color = 'darkOliveGreen';
-            break;
-        case(height > water +.2):
-            var color = 'sienna';
-            break;
-        case(height > water +.1):
-            var color = 'tan';
-            break;
-        case(height > water - 0):
-            var color = 'skyBLue';
-            break;
-        case(height > water - .1):
-            var color = 'deepSkyBlue';
-            break;
-        case(height > water - .2):
-            var color = 'royalBlue';
-            break;
-        case(height > water - .3):
-            var color = 'blue';
-            break;
-        case(height > water - .4):
-            var color = 'mediumBlue';//float2color(height);
-            break;
-        case(height > water - .5):
-            var color = 'midnightBlue';//float2color(height);
-            break;
-        case(height > water - .6):
-            var color = 'navy';//float2color(height);
-            break;
-        default:
-            var color = 'red';//float2color(height);
-            break;
-    }
-
-    return color;
-}
-
-function adjust(map, mdiff) {
-    var s = false, b = false, d;
-    for (var y=0; y<map.length; y++)
-        for (var x=0; x<map[y].length; x++) {
-            if (map[y][x] < s || s === false)
-                s = map[y][x];
-
-            if (map[y][x] > b || b === false)
-                b = map[y][x];
-        }
-            
-    d = b-s;
-            
-    for (var y=0; y<map.length; y++)
-        for (var x=0; x<map[y].length; x++) {
-            map[y][x] = Math.floor((map[y][x]-s) / d * mdiff);
-        }
-            
-    return map;
-}
-
-
-function drawTerrain(hMap){   
-    $('#seed').html(G.seed);
-    for(y in hMap){
-        squares = [];
-        for(x in hMap[y]){
-
-            var height = normalizeHeight(hMap[y][x]);      
-            
-            color = getTerrainColor(height);
-           
-            squares.push("<div class='tile' style='background: " + color + ";'></div>");
-        }
-        $('#map').append("<div id='y" + y + "'class='row'>" + squares.join('') + "</div>");
-    }
-}
-
-function drawProfile(y){  
-
-    $('#profile *').remove();
-    
-    rows = [];
-    
-    for(x = 0; x < map[y].length; x++){
-        height = normalizeHeight(map[y][x]);
-        rows.push("<div id='x" + x + "' class='profile tile' style='height: " + height * 100 + "px; background: " +
-        getTerrainColor(height) + "'></div>");
-    }   
-
-    $('#profile').css({height: G.H_map * G.tilesize + 50 + 'px', width: G.W_map * G.tilesize + 'px'});
-
-    $('#profile').append("<div class='profilewrap'>" + rows.join('') + "</div>");
-
-    $('.profile.tile').bind('mouseover', function(){
-        var x = $(this).attr('id').substring(1);
-        var h = map[y][x];    
-        $('#meter').html('XY: ' + x + ':' + y + ' | TRUE HEIGHT: ' + h + ' | NORMALIZED HEIGHT: ' + normalizeHeight(h));
-        
-    });
-}
-
-Math.rndseed = function(opt){
-    opt         = opt || {};
-    var seed    = opt.seed  || Math.random();
-    var max     = opt.max   || 1;
-    var min     = opt.min   || 0;
-
-    seed = (seed * 9301 + 49297) % 233280;
-    var rnd = seed / 233280;
-
-    return min + rnd * (max - min);
-}
-
-G = {
-    W_map:      257,
-    H_map:      257,
-    seed:       Math.random() * 100,
-    tilesize:   5,
-    H:          .65
+	return color;
 }
 
 function seededMap(){
-    
-    matrix = [];
-    
-    for(y = 0; y < G.H_map; y++){
-        matrix[y] = []
-        
-        //for(x = 0; x < G.W_map; x++)
-           // matrix[y][x] = 0; 
-    }
-     
-    matrix[0][0]                        = Math.random(); //Math.rndseed({seed: G.seed});
-    matrix[0][G.W_map - 1]              = Math.random(); //Math.rndseed({seed: G.seed});
-    matrix[G.H_map - 1][G.W_map - 1]    = Math.random(); //Math.rndseed({seed: G.seed});
-    matrix[G.H_map - 1][0]              = Math.random(); //Math.rndseed({seed: G.seed}); 
-    
-    return matrix;
+	
+	matrix = [];
+	
+	for(y = 0; y < G.mapHeight; y++)   
+		matrix[y] = [];
+	   
+	matrix[0][0]                            = Math.random(); 
+	matrix[0][G.mapWidth - 1]               = Math.random();
+	matrix[G.mapHeight - 1][G.mapWidth - 1] = Math.random();
+	matrix[G.mapHeight - 1][0]              = Math.random();
+	
+	return matrix;
 }
 
-function midpoint(){
-    
-    map = seededMap();
+function midpoint1d(M, x0, y0, x1, y1, dh){
+	var dx = x1 - x0;
+	var dy = y1 - y0;
+	var cx = x0 + dx/2;
+	var cy = y0 + dy/2;
+	var d2 = dh/2;
+	
+	if(cx % 1 !== 0 || cy % 1 !== 0)
+		return;
+	
+	//center point
+	M[cy][cx] = (M[y0][x0] + M[y1][x1]) / 2 + Math.random() * dh - d2;
 
-    var sqsize = G.W_map - 1;
-    
-    var queue = new Array();
-    queue.push([
-        {x: 0,      y: 0},
-        {x: sqsize, y: 0},
-        {x: sqsize, y: sqsize},
-        {x: 0,      y: sqsize}
-    ]);
+	var nh = dh/G.H;
 
-    var i = 0;
-    var j = 0;
-    var d = 1;
+	midpoint1d(M, x0, y0, cx, cy, nh);
+	midpoint1d(M, cx, cy, x1, y1, nh);
+}
 
-    while(queue.length > 0){
-             
-        rand = (Math.random() * (d - (d/2)));
-        
-        //rand = 0;
+function midpoint2d(M, NWx, NWy, SEx, SEy, dh){
+			
+	var dx = SEx - NWx;     
+	var dy = SEy - NWy;
+	var cx = NWx + dx/2; 
+	var cy = NWy + dy/2;
+	var d2 = dh/2; 
 
-        var sq = queue.shift(); 
+	if(cx % 1 !== 0 || cy % 1 !== 0)
+		return;
+   
+	// center point
+	M[cy][cx] = (M[NWy][NWx] + M[NWy][SEx] + M[SEy][SEx] + M[SEy][NWx]) / 4 + Math.random() * dh - d2;
+   
+	// generate top, bottom, left and right pts
+	if(M[NWy][cx] === undefined) M[NWy][cx] = (M[NWy][NWx] + M[NWy][SEx])/2 + Math.random() * dh - d2;
+	if(M[SEy][cx] === undefined) M[SEy][cx] = (M[SEy][NWx] + M[SEy][SEx])/2 + Math.random() * dh - d2;
+	if(M[cy][NWx] === undefined) M[cy][NWx] = (M[NWy][NWx] + M[SEy][NWx])/2 + Math.random() * dh - d2;
+	if(M[cy][SEx] === undefined) M[cy][SEx] = (M[NWy][SEx] + M[SEy][SEx])/2 + Math.random() * dh - d2;
+			
+	var nh = dh/G.H;
+	
+	midpoint2d(M, NWx, NWy, cx, cy, nh);
+	midpoint2d(M, cx, NWy, SEx, cy, nh);
+	midpoint2d(M, NWx, cy, cx, SEy, nh);
+	midpoint2d(M, cx, cy, SEx, SEy, nh);
+	
+}
 
-        // define center coords
-        var pC = {x: sq[0].x + ((sq[1].x - sq[0].x) / 2), y: sq[0].y + ((sq[3].y - sq[0].y) / 2)};
+function drawDiamond(g, x, y, w, h, height, c){
+   
+	if(height < 0){
+	
+		// DEPTH   
+		rgb = ColorLuminance(c, -.2);
+		g.fillStyle = rgb;
+		g.beginPath();
+		g.moveTo(x + w, y + (h / 2) + height); // C
+		g.lineTo(x + w, y + (h / 2)); // G
+		g.lineTo(x + (w / 2), y + h); // F
+		g.lineTo(x, y + (h / 2)); // E
+		g.closePath();
+		g.fill(); 
 
-        if(pC.x % 1 !== 0 || pC.y % 1 !== 0)
-            continue;
-        
-        // sum square vertices heights
-        sum = 0;
-        for(n = 0; n < 4; n++)
-            if(map[pC.y][pC.x] === undefined)
-                sum += map[sq[n].x][sq[n].y];
-        // set square center height
-        map[pC.y][pC.x] = 1/(((sum / 4) + rand) * 10); 
-        
-        // define diamond center points
-        var dm = [
-            {x: pC.x,       y: sq[0].y},
-            {x: sq[1].x,    y: pC.y},
-            {x: pC.x,       y: sq[2].y},
-            {x: sq[0].x,    y: pC.y}            
-        ];
-        
-        // set diamond heights in map
-        for(n = 0; n < 4; n++)
-            if(map[dm[n].y][dm[n].x] === undefined) 
-                map[dm[n].y][dm[n].x] = 1/((((map[pC.y][pC.x] + map[sq[n].y][sq[n].y]) / 2) + rand) * 10);
-                      
-        queue.push(
-            [sq[0], dm[0], pC, dm[3]],
-            [dm[0], sq[1], dm[1], pC],
-            [pC, dm[1], sq[2], dm[2]],
-            [dm[3], pC, dm[2], sq[3]]
-        );
-       
-        if(++i == Math.pow(2, j+1)){
-            d = d/G.H; 
-            j++;
-        } 
-       
-    }
+		rgb = ColorLuminance(c, -.6);
+		g.strokeStyle = 'rgb(0, 0, 0)';
+		g.fillStyle = rgb;    
+		g.beginPath();    
+		g.moveTo(x, y + (h / 2) + height); // B
+		g.lineTo(x + (w / 2), y + h + height); // D
+		g.lineTo(x + (w / 2), y + h); // F
+		g.lineTo(x, y + (h / 2)); // E
+		g.closePath();
+		g.fill();     
+		// DEPTH .END OF BLOCK
+	} 
 
+	g.strokeStyle = 'rgb(0, 0, 0)';
+	g.fillStyle = c;
+
+	g.beginPath();
+	g.moveTo((x + (w / 2)), y + height);
+	g.lineTo((x + w), (y + (h / 2)) + height);
+	g.lineTo((x + (w / 2)), (y + h) + height);
+	g.lineTo(x, (y + (h / 2)) + height);
+	g.closePath();
+	g.fill();
+	
+	// water surface
+	if(height > 0){
+		g.strokeStyle =  'rgba(111, 183, 226, .25)'; //'white'; //getTerrainColor(0);
+		
+		//g.fillStyle = 'rgba(111, 183, 226, .50)';
+
+		g.beginPath();
+		g.moveTo((x + (w / 2)), y);
+		g.lineTo((x + w), (y + (h / 2)));
+		g.lineTo((x + (w / 2)), (y + h));
+		g.lineTo(x, (y + (h / 2)));
+		g.closePath();
+		g.stroke();
+	}    
+	
+}
+
+function projection3D(g, G, x, y, tilt, height, color){
+
+	// small offset patch
+	y = y+(0);
+	x = x+(-1);
+
+	drawDiamond(g, (x * G.tilesize) + ((y % 2 === 0) ? G.tilesize / 2 : 0), ((y * G.tilesize * tilt) / 2) + 100, G.tilesize,
+	G.tilesize * tilt, -height * 50, color);
+}
+
+function projection2D(g, G, x, y, color){
+	g.fillStyle = color;
+	g.strokeStyle = 'black';
+	g.lineWidth = .1;
+
+	// small offset patch
+	y = y+(-1);
+	x = x+(0);
+
+	g.fillRect((x * G.tilesize), y * G.tilesize, G.tilesize,G.tilesize);
+	g.strokeRect((x * G.tilesize), y * G.tilesize, G.tilesize,G.tilesize);
+}
+
+function canvasDrawTerrain(g, G, hMap, projection){   
+	   
+	offsetY = 0;
+	offsetX = 0;
+
+	y = offsetY+1;
+	x = offsetX+1;
+
+	while(y != offsetY){
+
+		while(x != offsetX){
+
+			var height = normalizeHeight(hMap[y][x]);      
+			color = getTerrainColor(height);      
+
+			if(projection == '2D')     
+				projection2D(g, G, x, y, color);
+			else
+				projection3D(g, G, x, y, G.tilt, height, color);
+			
+			x = ((x + 1) == G.mapWidth) ? 0 : x + 1;
+		}
+					
+		x = offsetX + 1;
+		y = ((y + 1) == G.mapHeight) ? 0 : y + 1;
+	}
+	
+}
+
+function initMap(){
+
+	G = {
+		mapWidth:   513, //257,
+		mapHeight:  513, //257,
+		tilesize:   4,
+		H:          2,
+		tilt: 		.25
+	}
+
+	var c 		= document.getElementById('canvas');
+	c.width 	= G.mapWidth * G.tilesize;
+	c.height 	= G.mapHeight * G.tilesize * G.tilt;
+	var g 		= c.getContext('2d');
+
+	//Math.seedrandom('uhg2834562349857ssdfligh');
+
+	var seeds = {
+		leftupdown:     'bre',
+		leftright:      'cfd',
+		rightleft:      'as3',
+		rightupdown:    'zz4'
+	};
+
+	var variance = {
+		leftupdown:     Math.random() * 10, //.2,
+		leftright:      Math.random() * 10, //1.5,
+		rightleft:      Math.random() * 10, //1.5,
+		rightupdown:    Math.random() * 10//.25
+	}
+	
+	map = seededMap();
+
+	// NORTH
+	Math.seedrandom(seeds.leftupdown);    
+	midpoint1d(map, 0, 0, (G.mapWidth - 1), 0, variance.leftupdown); 
+   
+	// WEST
+	Math.seedrandom(seeds.leftright); 
+	midpoint1d(map, 0, 0, 0, (G.mapHeight - 1) , variance.leftright);
+	
+	// EAST    
+	Math.seedrandom(seeds.rightleft);
+	midpoint1d(map, (G.mapWidth - 1), 0, (G.mapWidth - 1), (G.mapHeight - 1) , variance.rightleft); 
+	
+	// SOUTH
+	Math.seedrandom(seeds.leftupdown); 
+	midpoint1d(map, 0, (G.mapHeight - 1), (G.mapWidth - 1), (G.mapHeight - 1) , variance.leftupdown);
+	
+	midpoint2d(map, 0, 0, (G.mapWidth - 1), (G.mapHeight - 1), 3);
+
+	return {context: g, settings: G, matrix: map};
 }
 
 $(document).ready(function(){
-    
-
-    midpoint();
-
-    //map = adjust(map, 100);
-
-    drawTerrain(map);    
-
-    $('.row').bind('mouseover', function(){
-        drawProfile($(this).attr('id').substring(1));    
-    });
-           
+	cfg = initMap();
+	canvasDrawTerrain(cfg.context, cfg.settings, cfg.matrix);
 });
+
+
+

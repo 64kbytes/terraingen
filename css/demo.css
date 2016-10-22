@@ -1,0 +1,38 @@
+body{
+	padding: 0;
+	margin: 0;
+	background: black;
+	color: white;
+	font-family: 'Open Sans', sans-serif;
+	overflow: hidden;
+}
+
+header{
+	position: relative;
+	top: 100px;
+}
+
+.full-screen{
+	height:100vh;
+	min-height:100vh;
+}
+
+h1, h2{
+	text-align: center;
+	font-weight: normal;
+}
+
+a{
+	text-decoration: none;
+}
+
+#links div{
+	text-align: center;
+}
+
+canvas{
+	position:absolute;
+	z-index: -1;
+	bottom: -156px;
+	background: black;
+}
